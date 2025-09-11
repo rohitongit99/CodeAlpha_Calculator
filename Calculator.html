@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>calculator</title>
+</head>
+<style>
+  body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .calculator {
+            background: linear-gradient(145deg, #1e1e2e, #2a2d3a);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            padding: 1rem;
+            width: 290px;
+            box-sizing: border-box;
+            transition: transform 0.2s ease;
+        }
+        .calculator:hover {
+            transform: scale(1.02);
+        }
+        .display {
+            background: #0f0f23;
+            color: #00ff88;
+            border-radius: 10px;
+            padding: 1.5rem;
+            font-size: 2rem;
+            text-align: right;
+            margin-bottom: 1rem;
+            border: 1px solid #333;
+            overflow-x: auto;
+            word-wrap: break-word;
+            min-height: 80px;
+            user-select: none;
+        }
+        .button {
+            background: linear-gradient(145deg, #3a3a3a, #2a2a2a);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 1.2rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+            user-select: none;
+        }
+        .button:hover {
+            background: linear-gradient(145deg, #4a4a4a, #3a3a3a);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
+        }
+        .button:active {
+            transform: translateY(0);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+        }
+        .operator {
+            background: linear-gradient(145deg, #ff9500, #e68600);
+            color: black;
+        }
+        .equals {
+            background: linear-gradient(145deg, #4cd964, #34c759);
+            color: black;
+            grid-column: span 2;
+        }
+        .zero {
+            grid-column: span 2;
+        }
+        .clear {
+            background: #ff3b30;
+            color: white;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+        }
+
+</style>
+<body>
+    <div class="calculator">
+        <div class="display" id="display">0</div>
+        <div class="grid">
+            <button class="button clear" data-value="AC">AC</button>
+            <button class="button clear" data-value="DEL">DEL</button>
+            <button class="button operator" data-value="%">%</button>
+            <button class="button operator" data-value="/">/</button>
+            <button class="button" data-value="7">7</button>
+            <button class="button" data-value="8">8</button>
+            <button class="button" data-value="9">9</button>
+            <button class="button operator" data-value="*">*</button>
+            <button class="button" data-value="4">4</button>
+            <button class="button" data-value="5">5</button>
+            <button class="button" data-value="6">6</button>
+            <button class="button operator" data-value="-">-</button>
+            <button class="button" data-value="1">1</button>
+            <button class="button" data-value="2">2</button>
+            <button class="button" data-value="3">3</button>
+            <button class="button operator" data-value="+">+</button>
+            <button class="button zero" data-value="0">0</button>
+            <button class="button" data-value=".">.</button>
+            <button class="button equals" data-value="=">=</button>
+        </div>
+    </div>
+
+  </body>
+  <script>
+    
+        
+        const display = document.getElementById('display');
+        const buttons = document.querySelectorAll('.button');
+
+        let currentNumber = '';
+        let previousNumber = '';
+        let operation = null;
+        let shouldResetDisplay = false;
+
+        function updateDisplay(value) {
+            display.textContent = value;
+        }
+
+        function calculate() {
+            console.log('Calculating:', previousNumber, operation, currentNumber);
+            let computation;
+            const prev = parseFloat(previousNumber);
+            const current = parseFloat(currentNumber);
+            if (isNaN(prev) || isNaN(current)) return;
+            switch (operation) {
+                case '+':
+                    computation = prev + current;
+                    break;
+                case '-':
+                    computation = prev - current;
+                    break;
+                case '*':
+                    computation = prev * current;
+                    break;
+                case '/':
+                    computation = prev / current;
+                    break;
+                case '%':
+                    computation = prev * (current / 100);
+                    break;
+                default:
+                    return;
+            }
+            operation = undefined;
+            currentNumber = computation.toString();
+            previousNumber = '';
+            console.log('Result:', computation);
+        }
+
+        buttons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                const value = e.target.getAttribute('data-value');
+                console.log('Button clicked:', value);
+
+                if (!isNaN(value) || value === '.') {
+                    if (value === '.' && currentNumber.includes('.')) return;
+                    if (shouldResetDisplay) {
+                        currentNumber = '';
+                        shouldResetDisplay = false;
+                    }
+                    currentNumber += value;
+                    updateDisplay(currentNumber);
+                } else if (value === 'AC') {
+                    currentNumber = '';
+                    previousNumber = '';
+                    operation = null;
+                    updateDisplay('0');
+                } else if (value === 'DEL') {
+                    currentNumber = currentNumber.slice(0, -1);
+                    updateDisplay(currentNumber || '0');
+                } else if (value === '=') {
+                    if (operation != null) {
+                        calculate();
+                        updateDisplay(currentNumber);
+                        operation = null;
+                        shouldResetDisplay = true;
+                    }
+                } else {
+                    if (operation != null) {
+                        calculate();
+                        updateDisplay(currentNumber);
+                    }
+                    operation = value === '%' ? '%' : value;
+                    previousNumber = currentNumber;
+                    currentNumber = '';
+                    shouldResetDisplay = true;
+                }
+            });
+        });
+
+  </script>
+</html>
